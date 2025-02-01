@@ -7,7 +7,7 @@ A Python-based application for generating report cards from Excel files using a 
 - Python 3.8+
 - Windows Operating System (due to Win32 dependencies)
 
-## Project Structure
+## Project Structure (Only for Convention not compulsory)
 ```
 report_generator/
 │

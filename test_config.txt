@@ -1,0 +1,4 @@
+excel_path=./input_files/test_marks.xlsx
+word_path=./input_files/test_word.docx
+mapping_path=./input_files/test_mapping.json
+class_name=test

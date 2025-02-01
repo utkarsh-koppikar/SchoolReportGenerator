@@ -29,8 +29,8 @@ report_generator/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/report-card-generator.git
-cd report-card-generator
+git clone https://github.com/unnatikoppikar/SchoolReportGenerator.git
+cd SchoolReportGenerator/
 ```
 
 ### 2. Create Virtual Environment
@@ -62,7 +62,7 @@ pip install -r requirements.txt
 - Maps Excel column names to report card template fields
 
 ### Word Template
-- Located in `input_files/template-word1A.docx`
+- Located in `input_files/{class_name}_word.docx`
 - Must have placeholders matching the mapping JSON
 
 ## Configuration
@@ -70,9 +70,9 @@ pip install -r requirements.txt
 ### Mapping JSON Example
 ```json
 {
-    "name": "Student Name Column",
-    "percentage": "Total Percentage Column",
-    "remark": "Remarks Column"
+    "name": "Name", //Excel Column Name
+    "percentage": "Total Percentage",
+    "remark": "Remarks"
 }
 ```
 
@@ -80,18 +80,28 @@ pip install -r requirements.txt
 
 ### Direct Python Execution
 ```bash
-python main.py
+python ReportGenV2.py
 ```
 
 ### Build Executable
 
 #### Using PyInstaller
 ```bash
-# Install PyInstaller
-pip install pyinstaller
-
 # Create executable
-pyinstaller --onefile --windowed --add-data "input_files;input_files" --add-data "mappings;mappings" main.py
+python -m PyInstaller --onefile --windowed --add-data "input_files;input_files" --add-data "mappings;mappings" ReportGenV2.py
+```
+## Running Tests
+
+To run the tests, first fill the test file paths in test_config.txt
+
+the run this command:
+
+```
+python test.py run
+```
+To test only data loading from excel files run this command:
+```
+python test.py read_excel
 ```
 
 ## Troubleshooting
@@ -109,19 +119,12 @@ Detailed dependencies are listed in `requirements.txt`. Key libraries include:
 - pywin32
 - tkinter
 
-## License
-[Your License Here - e.g., MIT]
-
 ## Contributing
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-## Contact
-[Your Contact Information]
-```
 
 ## Additional Notes for Setup
 
@@ -134,5 +137,3 @@ pywin32==303
 openpyxl==3.0.9
 tk==0.1.0
 ```
-
-Would you like me to elaborate on any section of the README or provide additional details about the project setup?

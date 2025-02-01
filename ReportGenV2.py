@@ -7,6 +7,7 @@ import time
 import win32com.client
 from docxtpl import DocxTemplate
 from docx2pdf import convert
+import traceback
 
 class FileManager:
     """Handles file and directory operations for the report card generator."""
@@ -44,9 +45,7 @@ class DataProcessor:
         """
         try:
             df = pd.read_excel(excel_path)
-            df = df.drop([0])
-            df.columns = df.iloc[0]
-            return df[1:]
+            return df[0:]
         except Exception as e:
             raise ValueError(f"Error loading Excel file: {e}")
     
@@ -68,73 +67,79 @@ class DataProcessor:
         :param class_name: Name of the class
         :return: Processed student data dictionary
         """
-        field_dict = {}
-        for key in self.column_map.keys():
-            if key not in ['percentage', 'remark', 'class']:
-                field_dict[key] = row[self.column_map[key]]
-            elif key == 'percentage':
-                field_dict['percentage'] = f"{float(row[self.column_map['percentage']]):.2f}%"
-            elif key == 'remark':
-                field_dict['remark'] = row[self.column_map['remark']] + "!"
-        
-        field_dict['class'] = class_name.replace("_", " ")
-        
-        # Handle null/empty values
-        nan_values = ['NAN', 'NONE', 'NA']
-        field_dict = {
-            key: value if value is not None and 
-            str(value).upper().replace(" ", "") not in nan_values 
-            else "---" 
-            for key, value in field_dict.items()
-        }
-        
-        return field_dict
+        try:
+            print(f"Processing student data for class: {class_name}")
+            print(f"Row data: {dict(row)}")
+            print(f"Column map: {self.column_map}")
+
+            field_dict = {}
+            print(f"Initial field_dict: {field_dict}")
+            for key in self.column_map.keys():
+                if key not in ['percentage', 'remark', 'class']:
+                    field_dict[key] = row[self.column_map[key]]
+                elif key == 'percentage':
+                    field_dict['percentage'] = f"{float(row[self.column_map['percentage']]):.2f}%"
+                elif key == 'remark':
+                    field_dict['remark'] = row[self.column_map['remark']] + "!"
+            
+            field_dict['class'] = class_name.replace("_", " ")
+            
+            # Handle null/empty values
+            nan_values = ['NAN', 'NONE', 'NA']
+            field_dict = {
+                key: value if value is not None and 
+                str(value).upper().replace(" ", "") not in nan_values 
+                else "---" 
+                for key, value in field_dict.items()
+            }
+            
+            print(f"Processed field dictionary: {field_dict}")
+            return field_dict
+
+        except Exception as e:
+            print(f"Error processing student data: {e}")
+            traceback.print_exc()
+            return None
 
 class ReportCardGenerator:
     """Manages the generation of report cards."""
     
-    def __init__(self, base_directory):
+    def __init__(self):
         """
         Initialize report card generator.
         
         :param base_directory: Base directory for project files
         """
-        self.base_directory = base_directory
         self.input_folder = 'input_files'
         self.mappings_folder = 'mappings'
     
-    def generate_report_cards(self, excel_filename, class_name):
+    def generate_report_cards(self, excel_path, template_path, mapping_path, class_name):
         """
         Generate report cards for a given class.
         
         :param excel_filename: Name of the Excel file
         :param class_name: Name of the class
         """
+        print(f"excel_path: {excel_path}")
+        print(f"template_path: {template_path}")
+        print(f"mapping_path: {mapping_path}")
+
         # Setup directories
         FileManager.ensure_directory_exists('word')
         report_cards_dir = f'{class_name} report_cards'
         FileManager.ensure_directory_exists(report_cards_dir)
         
-        # Paths
-        excel_path = FileManager.get_absolute_path(
-            self.base_directory, self.input_folder, excel_filename
-        )
-        mapping_path = FileManager.get_absolute_path(
-            self.base_directory, 
-            self.mappings_folder, 
-            f"{class_name.replace(' ', '_')}_mapping.json"
-        )
-        template_path = FileManager.get_absolute_path(
-            os.getcwd(), self.input_folder, 'template-word1A.docx'
-        )
-        
         # Process data
         data_processor = DataProcessor(excel_path, mapping_path)
         
+        print(f"data_processor: {data_processor}")
+
+        print(f"{data_processor.df.head()}")
         # Generate Word documents
-        for row in range(len(data_processor.df)):
+        for index,row in data_processor.df.iterrows():
+            print(f"row: {row}")
             student_data = data_processor.process_student_data(
-                data_processor.df.iloc[row], class_name
+                row, class_name
             )
             
             if student_data['name'] == '---':
@@ -202,11 +207,12 @@ class ReportCardGeneratorApp:
         
         # Variables
         self.excel_file_path = tk.StringVar()
+        self.word_file_path = tk.StringVar()
+        self.mapping_file_path = tk.StringVar()
         self.class_name = tk.StringVar()
         
         # Create UI
         self._create_ui()
-    
     def _create_ui(self):
         """Create the user interface components."""
         notebook = ttk.Notebook(self.root)
@@ -214,57 +220,128 @@ class ReportCardGeneratorApp:
         notebook.add(tab_run_script, text="Run Script")
         notebook.pack(expand=1, fill="both")
         
+        # File Selection Frame
+        file_frame = ttk.LabelFrame(tab_run_script, text="File Selection", padding=10)
+        file_frame.pack(fill="x", padx=10, pady=5)
+        
         # Excel File Selection
-        ttk.Label(tab_run_script, text="Choose Excel File:").grid(
-            row=0, column=0, padx=10, pady=10, sticky="w"
+        ttk.Label(file_frame, text="Excel File:").grid(
+            row=0, column=0, padx=5, pady=5, sticky="w"
         )
         ttk.Entry(
-            tab_run_script, 
+            file_frame, 
             textvariable=self.excel_file_path, 
-            state="readonly"
-        ).grid(row=0, column=1, padx=10, pady=10, sticky="we")
+            state="readonly",
+            width=50
+        ).grid(row=0, column=1, padx=5, pady=5, sticky="we")
         ttk.Button(
-            tab_run_script, 
-            text="Choose File", 
-            command=self._choose_file
-        ).grid(row=0, column=2, padx=10, pady=10)
+            file_frame, 
+            text="Browse", 
+            command=lambda: self._choose_file([("Excel files", "*.xlsx")],self.excel_file_path)
+        ).grid(row=0, column=2, padx=5, pady=5)
+        
+        # Word File Selection
+        ttk.Label(file_frame, text="Word Template:").grid(
+            row=1, column=0, padx=5, pady=5, sticky="w"
+        )
+        ttk.Entry(
+            file_frame, 
+            textvariable=self.word_file_path, 
+            state="readonly",
+            width=50
+        ).grid(row=1, column=1, padx=5, pady=5, sticky="we")
+        ttk.Button(
+            file_frame, 
+            text="Browse", 
+            command=lambda: self._choose_file([("Word files", "*.docx")],self.word_file_path)
+        ).grid(row=1, column=2, padx=5, pady=5)
+
+        # Mapping File Selection
+        ttk.Label(file_frame, text="Mapping File:").grid(
+            row=2, column=0, padx=5, pady=5, sticky="w"
+        )
+        ttk.Entry(
+            file_frame, 
+            textvariable=self.mapping_file_path, 
+            state="readonly",
+            width=50
+        ).grid(row=2, column=1, padx=5, pady=5, sticky="we")
+        ttk.Button(
+            file_frame, 
+            text="Browse", 
+            command=lambda: self._choose_file([("JSON files", "*.json")],self.mapping_file_path)
+        ).grid(row=2, column=2, padx=5, pady=5)
+
+        print
+        # Configure grid column weights
+        file_frame.columnconfigure(1, weight=1)
+
+        # Class Name Frame
+        class_frame = ttk.LabelFrame(tab_run_script, text="Class Details", padding=10)
+        class_frame.pack(fill="x", padx=10, pady=5)
         
         # Class Name Entry
-        ttk.Label(tab_run_script, text="Enter Class Name:").grid(
-            row=2, column=0, padx=10, pady=10, sticky="w"
+        ttk.Label(class_frame, text="Class Name:").grid(
+            row=0, column=0, padx=5, pady=5, sticky="w"
         )
         ttk.Entry(
-            tab_run_script, 
-            textvariable=self.class_name
-        ).grid(row=2, column=1, padx=10, pady=10, sticky="we")
+            class_frame, 
+            textvariable=self.class_name,
+            width=50
+        ).grid(row=0, column=1, padx=5, pady=5, sticky="we")
+        
+        # Configure grid column weights for class frame
+        class_frame.columnconfigure(1, weight=1)
+        
+        # Run Button Frame
+        button_frame = ttk.Frame(tab_run_script)
+        button_frame.pack(fill="x", padx=10, pady=10)
         
         # Run Script Button
         ttk.Button(
-            tab_run_script, 
-            text="Run Script", 
-            command=self._run_script
-        ).grid(row=3, column=0, columnspan=3, pady=10)
-    
-    def _choose_file(self):
-        """Open file dialog to choose Excel file."""
-        file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
+            button_frame, 
+            text="Run Script",
+            command=self._run_script,
+            style="Accent.TButton"  # Add this if you want to style the button differently
+        ).pack(pady=5)
+
+    def _choose_file(self, file_types,target_var):
+        """
+        Open file dialog to choose files based on specified types.
+        Args:
+            file_types: List of tuples with file type descriptions and extensions.
+                    Example: [("Excel files", "*.xlsx"), ("JSON files", "*.json")]
+        """
+        if file_types is None:
+            file_types = [
+                ("Excel files", "*.xlsx"),
+                ("Word files", "*.docx"),
+                ("JSON files", "*.json")
+            ]
+        
+        file_path = filedialog.askopenfilename(filetypes=file_types)
         if file_path:
-            self.excel_file_path.set(file_path)
+            target_var.set(file_path)
     
     def _run_script(self):
         """Execute the report card generation script."""
-        excel_filename = os.path.basename(self.excel_file_path.get())
+        excel_path = self.excel_file_path.get()
+        word_path = self.word_file_path.get()
+        mapping_path = self.mapping_file_path.get()
         class_name = self.class_name.get()
         
-        if not excel_filename or not class_name:
-            messagebox.showerror("Error", "Please select Excel file and enter class name")
+        if not excel_path or not word_path or not mapping_path or not class_name:
+            messagebox.showerror("Error", "Please select files and enter class name")
             return
         
         try:
-            generator = ReportCardGenerator(self.base_directory)
-            generator.generate_report_cards(excel_filename, class_name)
+            generator = ReportCardGenerator()
+            generator.generate_report_cards(excel_path,word_path,mapping_path, class_name)
             messagebox.showinfo("Success", "Report cards generated successfully!")
+
         except Exception as e:
+            print("Error occurred:")
+            traceback.print_exc()  # Print full stack trace
             messagebox.showerror("Error", str(e))
 
 def quit_word_application():

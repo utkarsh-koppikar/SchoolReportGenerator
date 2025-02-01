@@ -5,3 +5,4 @@ build/*
 /mappings/*
 !/mappings/test*
 *.exe
+venv/*

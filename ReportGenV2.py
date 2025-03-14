@@ -9,6 +9,12 @@ from docxtpl import DocxTemplate
 from docx2pdf import convert
 import traceback
 
+def column_to_index(column_name):
+    index = 0
+    for i, char in enumerate(reversed(column_name)):
+        index += (ord(char.upper()) - ord('A') + 1) * (26 ** i)
+    return index - 1
+
 class FileManager:
     """Handles file and directory operations for the report card generator."""
     
@@ -44,8 +50,9 @@ class DataProcessor:
         :return: Processed DataFrame
         """
         try:
-            df = pd.read_excel(excel_path)
-            return df[0:]
+            df = pd.read_excel(excel_path,header=None).drop([0, 1, 2, 3])
+            print(df.head())
+            return df
         except Exception as e:
             raise ValueError(f"Error loading Excel file: {e}")
     
@@ -75,12 +82,7 @@ class DataProcessor:
             field_dict = {}
             print(f"Initial field_dict: {field_dict}")
             for key in self.column_map.keys():
-                if key not in ['percentage', 'remark', 'class']:
-                    field_dict[key] = row[self.column_map[key]]
-                elif key == 'percentage':
-                    field_dict['percentage'] = f"{float(row[self.column_map['percentage']]):.2f}%"
-                elif key == 'remark':
-                    field_dict['remark'] = row[self.column_map['remark']] + "!"
+                field_dict[key] = row[column_to_index(self.column_map[key])]
             
             field_dict['class'] = class_name.replace("_", " ")
             
@@ -103,15 +105,6 @@ class DataProcessor:
 
 class ReportCardGenerator:
     """Manages the generation of report cards."""
-    
-    def __init__(self):
-        """
-        Initialize report card generator.
-        
-        :param base_directory: Base directory for project files
-        """
-        self.input_folder = 'input_files'
-        self.mappings_folder = 'mappings'
     
     def generate_report_cards(self, excel_path, template_path, mapping_path, class_name):
         """
@@ -142,7 +135,7 @@ class ReportCardGenerator:
                 row, class_name
             )
             
-            if student_data['name'] == '---':
+            if student_data is None:
                 break
             
             self._create_word_document(
@@ -182,7 +175,7 @@ class ReportCardGenerator:
         :param output_dir: Output directory for PDF files
         """
         for row in range(len(df)):
-            student = df.iloc[row][column_map['name']]
+            student = df.iloc[row][column_to_index(column_map['name'])]
             word_filename = f'{student}.docx'
             word_path = os.path.join(os.getcwd(), 'word', word_filename)
             pdf_path = os.path.join(os.getcwd(), output_dir, f'{student}.pdf')

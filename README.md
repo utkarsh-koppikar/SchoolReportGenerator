@@ -92,7 +92,7 @@ python ReportGenV2.py
 #### Using PyInstaller
 ```bash
 # Create executable
-pyinstaller --onefile --windowed ReportGenV2.py
+pyinstaller --onefile --nowindowed ReportGenV2.py
 ```
 ## Running Tests
 

@@ -1,13 +1,34 @@
-build/*
-*.spec
+# Build outputs
+bin/
+obj/
+publish/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+*report_cards/
+word/
+
+# Input/output files (keep test files)
 /input_files/*
 !/input_files/test*
 /mappings/*
 !/mappings/test*
-*.exe
-venv/*
-*report_cards*
-word/*
-__pycache__/*
-dist/*
-!dist/ReportGenV2.exe
+
+# Python legacy (can be removed later)
+venv/
+__pycache__/
+*.pyc
+*.spec
+build/
+
+# Executables in dist (large files)
+dist/*.exe

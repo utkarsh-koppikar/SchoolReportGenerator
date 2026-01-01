@@ -1,0 +1,84 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="SchoolReportGenerator.MainWindow"
+        Title="Report Card Generator"
+        Width="650" Height="620"
+        WindowStartupLocation="CenterScreen">
+    
+    <StackPanel Margin="20" Spacing="15">
+        
+        <!-- File Selection Section -->
+        <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Padding="15">
+            <StackPanel Spacing="10">
+                <TextBlock Text="File Selection" FontWeight="Bold" FontSize="14"/>
+                
+                <!-- Excel File -->
+                <Grid ColumnDefinitions="110,*,80">
+                    <TextBlock Text="Excel File:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="ExcelPathBox" IsReadOnly="True" Margin="5,0"/>
+                    <Button Grid.Column="2" Content="Browse" Click="BrowseExcel_Click"/>
+                </Grid>
+                
+                <!-- Word Template -->
+                <Grid ColumnDefinitions="110,*,80">
+                    <TextBlock Text="Word Template:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="WordPathBox" IsReadOnly="True" Margin="5,0"/>
+                    <Button Grid.Column="2" Content="Browse" Click="BrowseWord_Click"/>
+                </Grid>
+                
+                <!-- Mapping File -->
+                <Grid ColumnDefinitions="110,*,80">
+                    <TextBlock Text="Mapping File:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="MappingPathBox" IsReadOnly="True" Margin="5,0"/>
+                    <Button Grid.Column="2" Content="Browse" Click="BrowseMapping_Click"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+        
+        <!-- Class Details Section -->
+        <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Padding="15">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Class Details" FontWeight="Bold" FontSize="14"/>
+                <Grid ColumnDefinitions="110,*">
+                    <TextBlock Text="Class Name:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="ClassNameBox" Margin="5,0"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+        
+        <!-- Generate Button -->
+        <Button x:Name="GenerateButton"
+                Content="Generate Report Cards" 
+                HorizontalAlignment="Center" 
+                Padding="20,10"
+                Click="Generate_Click"/>
+        
+        <!-- Progress Section -->
+        <Border x:Name="ProgressSection" BorderBrush="LightBlue" BorderThickness="2" CornerRadius="5" Padding="15" Background="#F0F8FF">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Progress" FontWeight="Bold" FontSize="14"/>
+                
+                <!-- Progress Bar -->
+                <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Value="0" Height="25"/>
+                
+                <!-- Progress Count: 3/6 done -->
+                <TextBlock x:Name="ProgressCountText" Text="" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                
+                <!-- Current Student -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+                    <TextBlock Text="Currently generating:" Foreground="Gray"/>
+                    <TextBlock x:Name="CurrentStudentText" Text="" FontWeight="Bold" Foreground="Blue"/>
+                </StackPanel>
+                
+                <!-- Remaining -->
+                <TextBlock x:Name="RemainingText" Text="" Foreground="Gray" HorizontalAlignment="Center" FontStyle="Italic"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Status Message (Success/Error shown here, not popup) -->
+        <Border x:Name="StatusBorder" CornerRadius="5" Padding="10" IsVisible="False">
+            <TextBlock x:Name="StatusText" HorizontalAlignment="Center" FontWeight="Bold" FontSize="14"/>
+        </Border>
+        
+    </StackPanel>
+</Window>

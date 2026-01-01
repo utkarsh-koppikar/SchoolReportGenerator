@@ -1,143 +1,116 @@
-# Report Card Generator
+# School Report Card Generator
 
-## Download Application
-[ReportGenV2.exe](https://github.com/unnatikoppikar/SchoolReportGenerator/raw/main/dist/ReportGenV2.exe
-)
+A cross-platform application for generating PDF report cards from Excel data.
 
-## Project Overview
-A Python-based application for generating report cards from Excel files using a Word template.
+## Download
 
-## Prerequisites
-- Python 3.8+
-- Windows Operating System (due to Win32 dependencies)
+**[SchoolReportGenerator.exe](./dist/SchoolReportGenerator.exe)** - Windows executable (self-contained, no installation required)
 
-## Project Structure (Only for Convention not compulsory)
-```
-report_generator/
-│
-├── input_files/
-│   ├── template-word1A.docx
-│   └── student_marks.xlsx
-│
-├── mappings/
-│   ├── I_A_mapping.json
-│   ├── II_B_mapping.json
-│   └── ... (other class mappings)
-│
-├── requirements.txt
-├── main.py
-└── setup.py
-```
+## Features
 
-## Setup Instructions
+- ✅ **No Microsoft Word required** - Generates PDFs directly
+- ✅ **Self-contained executable** - No .NET or other runtime needed on target machine
+- ✅ **Cross-platform development** - Built with .NET 9 and Avalonia UI
+- ✅ **Live progress tracking** - Shows current student and remaining count
+- ✅ **Simple GUI** - Easy file selection and one-click generation
 
-### 1. Clone the Repository
+## How It Works
+
+1. **Excel File** - Contains student data (names, grades, etc.)
+2. **Mapping File** - JSON file that maps Excel columns to report fields
+3. **Class Name** - Used for output folder naming
+4. **Output** - PDF report cards generated in `{ClassName} report_cards/` folder
+
+## Usage
+
+### GUI Mode
+1. Run `SchoolReportGenerator.exe`
+2. Browse and select your Excel file
+3. Browse and select your Word template (used for reference only)
+4. Browse and select your mapping JSON file
+5. Enter the class name
+6. Click "Generate Report Cards"
+7. Watch the progress bar as reports are generated
+
+### Command Line Mode
 ```bash
-git clone https://github.com/unnatikoppikar/SchoolReportGenerator.git
-cd SchoolReportGenerator/
+SchoolReportGenerator.exe <excel_path> <template_path> <mapping_path> <class_name>
 ```
 
-### 2. Create Virtual Environment
+Example:
 ```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# macOS/Linux
-python3 -m venv venv
-source venv/Scripts/activate
+SchoolReportGenerator.exe "./marks.xlsx" "./template.docx" "./mapping.json" "Class_5A"
 ```
 
-### 3. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+## File Formats
 
-## Input File Preparations
+### Excel File
+- First row: Headers (ignored)
+- Subsequent rows: Student data
+- Columns referenced by letter (A, B, C, etc.)
 
-### Excel File Requirements
-- Located in `input_files/`
-- Filename format: `{class_name}_marks.xlsx`
-- Columns must match the corresponding mapping JSON
-
-### Mapping JSON Files
-- Located in `mappings/`
-- Filename format: `{Class_Name}_mapping.json`
-- Maps Excel column names to report card template fields
-
-### Word Template
-- Located in `input_files/{class_name}_word.docx`
-- Must have placeholders matching the mapping JSON
-
-## Configuration
-
-### Mapping JSON Example
+### Mapping JSON
+Maps field names to Excel column letters:
 ```json
 {
-    "name": "Name", //Excel Column Name
-    "percentage": "Total Percentage",
-    "remark": "Remarks"
+    "name": "A",
+    "class": "B",
+    "result": "C",
+    "marks": "D"
 }
 ```
 
-## Running the Application
+## Development
 
-### Direct Python Execution
+### Prerequisites
+- .NET 9 SDK
+- Visual Studio Code or Visual Studio
+
+### Build from Source
 ```bash
-python ReportGenV2.py
+cd SchoolReportGeneratorCSharp
+dotnet restore
+dotnet build
+dotnet run
 ```
 
-### Build Executable
-
-#### Using PyInstaller
+### Build Windows Executable
 ```bash
-# Create executable
-pyinstaller --onefile --nowindowed ReportGenV2.py
-```
-## Running Tests
-
-To run the tests, first fill the test file paths in test_config.txt
-
-the run this command:
-
-```
-python test.py run
-```
-To test only data loading from excel files run this command:
-```
-python test.py read_excel
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 ```
 
-## Troubleshooting
+Output: `bin/Release/net9.0/win-x64/publish/SchoolReportGenerator.exe`
 
-### Common Issues
-- Ensure all required dependencies are installed
-- Check Excel file format matches expected structure
-- Verify mapping JSON is correctly configured
+## Project Structure
 
-### Dependencies
-Detailed dependencies are listed in `requirements.txt`. Key libraries include:
-- pandas
-- python-docx
-- docxtpl
-- pywin32
-- tkinter
-
-## Contributing
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## Additional Notes for Setup
-
-### Requirements.txt Content
 ```
-pandas==1.3.5
-python-docx==0.8.11
-docxtpl==0.16.4
-pywin32==303
-openpyxl==3.0.9
-tk==0.1.0
+SchoolReportGenerator/
+├── SchoolReportGeneratorCSharp/     # C# source code
+│   ├── Program.cs                   # Entry point
+│   ├── MainWindow.axaml             # UI layout
+│   ├── MainWindow.axaml.cs          # UI logic
+│   └── Services/
+│       ├── DataProcessor.cs         # Excel reading
+│       └── ReportCardGenerator.cs   # PDF generation
+├── input_files/                     # Test files
+├── mappings/                        # Mapping templates
+├── dist/                            # Compiled executables
+└── README.md
 ```
+
+## Technology Stack
+
+- **C# / .NET 9** - Core application
+- **Avalonia UI** - Cross-platform GUI framework
+- **ClosedXML** - Excel file reading
+- **QuestPDF** - PDF generation
+- **No external dependencies** - Runs standalone on Windows
+
+## Legacy Python Version
+
+The original Python version is preserved in `README_old.md`. It required Microsoft Word for PDF conversion and had DLL compatibility issues across different Windows machines. The C# version solves these issues with a fully self-contained approach.
+
+## License
+
+MIT License
+

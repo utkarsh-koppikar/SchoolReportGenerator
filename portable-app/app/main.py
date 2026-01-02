@@ -13,6 +13,7 @@ from flask import Flask, render_template, request, jsonify, send_file, session
 from werkzeug.utils import secure_filename
 
 from services import ReportGenerator, load_settings, PDFConverter
+from version import VERSION
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -55,7 +56,8 @@ def index():
         'index.html',
         libreoffice_available=libreoffice_available,
         libreoffice_version=libreoffice_version,
-        settings=settings
+        settings=settings,
+        version=VERSION
     )
 
 

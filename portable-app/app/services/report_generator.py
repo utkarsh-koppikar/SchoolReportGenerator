@@ -118,7 +118,8 @@ class ReportGenerator:
                     results["errors"].append("No student data found in Excel file")
                     return results
                 
-                # Process each student
+                # PHASE 1: Fill all templates first (fast)
+                docx_files = []
                 for i, row in enumerate(student_rows):
                     current = i + 1
                     
@@ -136,22 +137,24 @@ class ReportGenerator:
                         # Fill template
                         docx_path = temp_dir / f"{safe_name}.docx"
                         template_filler.fill_template(student_data, str(docx_path))
-                        
-                        if progress_callback:
-                            progress_callback(current, total_students, student_name, "Converting to PDF...")
-                        
-                        # Convert to PDF
-                        success, pdf_result, _ = pdf_converter.convert(str(docx_path), str(output_path))
-                        
-                        if success:
-                            results["generated"] += 1
-                        else:
-                            results["failed"] += 1
-                            results["errors"].append(f"{student_name}: {pdf_result}")
+                        docx_files.append(str(docx_path))
                     
                     except Exception as e:
                         results["failed"] += 1
                         results["errors"].append(f"{student_name}: {str(e)}")
+                
+                # PHASE 2: Batch convert all docx to PDF (single LibreOffice call!)
+                if docx_files:
+                    if progress_callback:
+                        progress_callback(total_students, total_students, "All students", "Converting to PDF (batch)...")
+                    
+                    # Use batch conversion - much faster!
+                    batch_results = pdf_converter.convert_batch_single_call(docx_files, str(output_path))
+                    
+                    results["generated"] = batch_results.get("success_count", 0)
+                    results["failed"] += batch_results.get("failure_count", 0)
+                    if batch_results.get("errors"):
+                        results["errors"].extend(batch_results["errors"])
                 
                 results["success"] = results["failed"] == 0
                 

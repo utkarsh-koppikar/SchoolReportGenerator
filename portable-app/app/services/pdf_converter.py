@@ -149,7 +149,7 @@ class PDFConverter:
         progress_callback: Optional[callable] = None
     ) -> List[Tuple[str, bool, str]]:
         """
-        Convert multiple Word documents to PDF.
+        Convert multiple Word documents to PDF (one at a time).
         
         Args:
             docx_files: List of paths to .docx files
@@ -172,6 +172,70 @@ class PDFConverter:
             results.append((filename, success, result))
         
         return results
+    
+    def convert_batch_single_call(
+        self,
+        docx_files: List[str],
+        output_dir: str
+    ) -> dict:
+        """
+        Convert ALL documents in a SINGLE LibreOffice call.
+        Much faster than converting one at a time!
+        
+        Args:
+            docx_files: List of paths to .docx files
+            output_dir: Directory to save PDFs
+        
+        Returns:
+            Dict with success_count, failure_count, errors
+        """
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        result = {
+            "success_count": 0,
+            "failure_count": 0,
+            "errors": []
+        }
+        
+        if not docx_files:
+            return result
+        
+        # Build single command with ALL files
+        cmd = [
+            self.libreoffice_path,
+            "--headless",
+            "--convert-to", "pdf",
+            "--outdir", str(output_path)
+        ] + [str(f) for f in docx_files]
+        
+        try:
+            # Single call converts ALL files!
+            subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=self.timeout_seconds * len(docx_files),  # Scale timeout
+                cwd=str(output_path)
+            )
+            
+            # Check which files were created
+            for docx_path in docx_files:
+                expected_pdf = output_path / (Path(docx_path).stem + ".pdf")
+                if expected_pdf.exists():
+                    result["success_count"] += 1
+                else:
+                    result["failure_count"] += 1
+                    result["errors"].append(f"Failed to convert: {Path(docx_path).name}")
+        
+        except subprocess.TimeoutExpired:
+            result["errors"].append(f"Batch conversion timed out")
+            result["failure_count"] = len(docx_files)
+        except Exception as e:
+            result["errors"].append(f"Batch conversion error: {str(e)}")
+            result["failure_count"] = len(docx_files)
+        
+        return result
     
     def is_available(self) -> bool:
         """Check if LibreOffice is available and working."""

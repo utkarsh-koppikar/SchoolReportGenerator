@@ -40,3 +40,7 @@ portable-app/dist/
 portable-app/venv/
 portable-app/uploads/
 portable-app/output/
+
+# Docker
+portable-app/output/
+

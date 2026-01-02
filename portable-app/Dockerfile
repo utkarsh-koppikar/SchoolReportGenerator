@@ -27,13 +27,14 @@ COPY input_files/ ./input_files/
 # Create output directory
 RUN mkdir -p /app/output
 
-# Expose Flask port
-EXPOSE 8080
-
 # Set environment variables
 ENV FLASK_APP=app/main.py
 ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
 
-# Run the Flask app
+# Expose Flask port
+EXPOSE 8080
+
+# Run the Flask app (uses PORT env variable)
 CMD ["python", "app/main.py"]
 

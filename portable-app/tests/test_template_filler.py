@@ -31,7 +31,7 @@ def test_sanitize_filename():
     assert sanitize_filename("...") == "unnamed"
     assert sanitize_filename("  name  ") == "name"
     
-    print("  ✓ All sanitize_filename tests passed!")
+    print("  [OK] All sanitize_filename tests passed!")
 
 
 def test_template_filler():
@@ -79,7 +79,7 @@ def test_template_filler():
         assert "Class 5A" in full_text, "Class should be replaced"
         assert "85" in full_text, "English score should be replaced"
         
-        print("  ✓ All TemplateFiller tests passed!")
+        print("  [OK] All TemplateFiller tests passed!")
 
 
 def test_template_placeholders():
@@ -101,7 +101,7 @@ def test_template_placeholders():
         # Note: docxtpl might not find all in simple cases, but it should work with render
         print(f"  Found placeholders: {placeholders}")
         
-        print("  ✓ Placeholder extraction test passed!")
+        print("  [OK] Placeholder extraction test passed!")
 
 
 if __name__ == "__main__":
@@ -115,13 +115,13 @@ if __name__ == "__main__":
         test_template_placeholders()
         
         print("\n" + "="*50)
-        print("✓ ALL TESTS PASSED!")
+        print("[OK] ALL TESTS PASSED!")
         print("="*50 + "\n")
     except AssertionError as e:
-        print(f"\n✗ TEST FAILED: {e}")
+        print(f"\n[FAIL] TEST FAILED: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"\n✗ ERROR: {e}")
+        print(f"\n[FAIL] ERROR: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

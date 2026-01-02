@@ -30,7 +30,7 @@ def test_column_letter_to_index():
     assert column_letter_to_index("a") == 0, "a should be 0"
     assert column_letter_to_index("aa") == 26, "aa should be 26"
     
-    print("  ✓ All column_letter_to_index tests passed!")
+    print("  [OK] All column_letter_to_index tests passed!")
 
 
 def test_data_processor_with_test_data():
@@ -89,7 +89,7 @@ def test_data_processor_with_test_data():
         assert student1["english"] == "85", f"Expected '85', got {student1['english']}"
         assert student1["class"] == "Class 5A", f"Expected 'Class 5A', got {student1['class']}"
         
-        print("  ✓ All DataProcessor tests passed!")
+        print("  [OK] All DataProcessor tests passed!")
 
 
 def test_null_handling():
@@ -127,7 +127,7 @@ def test_null_handling():
         assert student2["name"] == "---", f"Expected '---' for empty, got {student2['name']}"
         assert student2["score"] == "---", f"Expected '---' for NA, got {student2['score']}"
         
-        print("  ✓ All null handling tests passed!")
+        print("  [OK] All null handling tests passed!")
 
 
 if __name__ == "__main__":
@@ -141,13 +141,13 @@ if __name__ == "__main__":
         test_null_handling()
         
         print("\n" + "="*50)
-        print("✓ ALL TESTS PASSED!")
+        print("[OK] ALL TESTS PASSED!")
         print("="*50 + "\n")
     except AssertionError as e:
-        print(f"\n✗ TEST FAILED: {e}")
+        print(f"\n[FAIL] TEST FAILED: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"\n✗ ERROR: {e}")
+        print(f"\n[FAIL] ERROR: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

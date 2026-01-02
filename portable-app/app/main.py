@@ -248,7 +248,7 @@ if __name__ == '__main__':
     import webbrowser
     import threading
     
-    port = 8080
+    port = int(os.environ.get('PORT', 8080))
     url = f"http://localhost:{port}"
     
     # Open browser after a short delay

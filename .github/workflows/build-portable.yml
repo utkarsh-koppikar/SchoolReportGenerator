@@ -3,9 +3,6 @@ name: Build Portable App
 on:
   push:
     branches: [main]
-    paths:
-      - 'portable-app/**'
-      - '.github/workflows/build-portable.yml'
   workflow_dispatch:
 
 jobs:

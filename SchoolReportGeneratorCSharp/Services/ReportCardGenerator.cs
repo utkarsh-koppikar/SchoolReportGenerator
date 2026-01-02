@@ -52,13 +52,14 @@ public class ReportCardGenerator
 
             current++;
             var studentName = studentData["name"];
+            var safeFileName = SanitizeFileName(studentName);
             
             // Report progress
             progressCallback?.Invoke(current, total, $"{studentName} (filling template)");
             Console.WriteLine($"Filling template for {studentName} ({current}/{total})");
 
-            var docxPath = Path.Combine(tempDir, $"{studentName}.docx");
-            var pdfPath = Path.Combine(reportCardsDir, $"{studentName}.pdf");
+            var docxPath = Path.Combine(tempDir, $"{safeFileName}.docx");
+            var pdfPath = Path.Combine(reportCardsDir, $"{safeFileName}.pdf");
             
             FillWordTemplate(templatePath, studentData, docxPath);
             docxFiles.Add((docxPath, pdfPath));
@@ -179,5 +180,16 @@ public class ReportCardGenerator
         {
             Directory.CreateDirectory(directory);
         }
+    }
+
+    /// <summary>
+    /// Sanitize filename by removing invalid characters.
+    /// Windows doesn't allow: \ / : * ? " < > |
+    /// </summary>
+    private string SanitizeFileName(string fileName)
+    {
+        var invalidChars = Path.GetInvalidFileNameChars();
+        var sanitized = string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
+        return sanitized.Trim();
     }
 }
